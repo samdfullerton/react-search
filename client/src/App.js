@@ -1,17 +1,24 @@
 import './App.css';
 import React from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import homepage from "./pages/homepage";
+import HomePage from "./pages/HomePage";
 // books homepage
-import Detail from "./pages/Detail";
+import SavedPage from "./pages/SavedPage";
 // details is saved page
 import NoMatch from "./pages/NoMatch";
 
 function App() {
   return (
-    <div className="App">
+    <Router>
+      <div className="App">
+      <Switch>
+        <Route exact path="/" component={HomePage} />
+        <Route  exact path="/saved" component={SavedPage} />
+        <Route component={NoMatch}/>
+      </Switch>
+      </div>
+    </Router>
 
-    </div>
   );
 }
 

@@ -5,7 +5,7 @@ import axios from "axios";
 export default {
     // Gets all books
     getBooks: function (q) {
-        return axios.get("/api/google", { params: { q: "title:" + q } });
+        return axios.get("/api/google", { params: { q:  q } });
     },
     // Gets all the saved books
     getSavedBook: function () {
