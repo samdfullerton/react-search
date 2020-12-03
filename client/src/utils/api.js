@@ -1,11 +1,13 @@
 /* eslint-disable import/no-anonymous-default-export */
 import axios from "axios";
+import { query } from "express";
 
 
 export default {
     // Gets all books
-    getBooks: function (q) {
-        return axios.get("/api/google", { params: { q:  q } });
+    getBooks: function (query) {
+       return axios.get("https://www.googleapis.com/books/v1/volumes", {params: {q:query}})
+
     },
     // Gets all the saved books
     getSavedBook: function () {

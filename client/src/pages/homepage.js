@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import DeleteBtn from "../components/DeleteBtn";
 import Jumbotron from "../components/Jumbotron";
 import API from "../utils/api";
@@ -7,42 +7,38 @@ import { Col, Row, Container } from "../components/Grid";
 import { List, ListItem } from "../components/List";
 import { Input, TextArea, FormBtn } from "../components/Form";
 
-class HomePage extends Component {
-  // Setting our component's initial state
-  state = {
-    books: [],
-    q: ""
-  }
-  // Load all books and store them with setBooks
-
-// Loads all books and sets them to books
-getBooks = ()=> {
-  API.getBooks(this.state.q)
-    .then(res => 
-      this.setState({
-        books: res.data
-      })
-    )
-    .catch(err => console.log(err));
-};
-
-
-// Handles updating component state when the user types into the input field
-handleInputChange = (event) => {
-  const { name, value } = event.target;
-  this.setState({
-    [name]: value
-  })
-};
+function HomePage() {
+  
+  const [searchBooks, setSearchBooks] = useState([])
+  
+  const [query, setQuery] = useState("")
 
 // When the form is submitted, use the API.saveBook method to save the book data
 // Then reload books from the database
-handleFormSubmit = (event) => {
+const handleFormSubmit = (event) => {
   event.preventDefault();
-  this.getBooks();
+  if (!query) {
+    return false
+  }
+  API.getBooks(query).then(({data})=> {
+    const bookData = data.items.map((book)=> ({
+      googleId: book.id,
+      authors: book.volumeInfo.authors,
+      title: book.volumeInfo.title,
+      description: book.volumeInfo.description,
+      image: book.volumeInfo.imageLinks.thumbnail,
+      link: book.volumeInfo.infoLink
+    }));
+    console.log(bookData)
+    setSearchBooks(bookData)
+  }) 
+  .then(()=> setQuery(""))
+  .catch((err)=> console.log(err))
 };
-render(){
-
+const handleBookSave = (googleId) => {
+  const savedBook = searchBooks.find((book)=> book.googleId === googleId)
+  API.saveBook(savedBook).then(()=> console.log("book saved")).catch((err)=> console.log(err))
+}
 
   return (
     <Container fluid>
@@ -53,15 +49,15 @@ render(){
           </Jumbotron>
           <form>
             <Input
-              onChange={this.handleInputChange}
-              name="q"
-              type="text" 
-              value={this.state.q}
+              onChange={(event)=> setQuery(event.target.value) }
+              name="query"
+              value={query}
               placeholder="Title (required)"
             />
 
             <FormBtn
-              onClick={this.handleFormSubmit}
+              onClick={handleFormSubmit}
+          
             >
               Submit Book
               </FormBtn>
@@ -71,27 +67,27 @@ render(){
           <Jumbotron>
             <h1>Books On My List</h1>
           </Jumbotron>
-          {/* {books.length ? (
+          {searchBooks.length ? (
             <List>
-              {books.map(book => (
-                <ListItem key={book._id}>
-                  <Link to={"/books/" + book._id}>
+              {searchBooks.map(book => (
+                <ListItem key={book.googleId}>
+                  <img src={book.image}/>
+                  <Link to={book.link}>
                     <strong>
                       {book.title} by {book.author}
                     </strong>
-                  </Link> */}
-                  {/* <DeleteBtn onClick={() => deleteBook(book._id)} /> */}
-                {/* </ListItem>
+                  </Link>
+          <saveBtn onClick={() => handleBookSave(book.googleId)} />
+          </ListItem>
               ))}
             </List>
           ) : (
               <h3>No Results to Display</h3>
-            )} */}
+            )}
         </Col>
       </Row>
     </Container>
   );
-}
 }
 
 export default HomePage;
